@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Logaritma (15 Soal) - Matematika SMA</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- KaTeX for Math Formatting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .katex-display {
+            margin: 0.3em 0 !important;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-extrabold text-lg shadow-md">
+                    $\log$
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-slate-900 text-base leading-tight">Kuis Interaktif Logaritma</h1>
+                    <p class="text-xs text-slate-500 font-medium">15 Soal Variasi Baru • 5 Sifat Utama</p>
+                </div>
+            </div>
+
+            <!-- Action Controls Header -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="openHistoryModal()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i>
+                    <span class="hidden sm:inline">Riwayat</span>
+                </button>
+                <button onclick="confirmReset()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-xl border border-rose-200 transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span class="hidden sm:inline">Mulai Ulang</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Top Overall Progress Bar -->
+        <div class="w-full bg-slate-100 h-1.5">
+            <div id="quiz-progress-bar" class="bg-indigo-600 h-1.5 w-0 transition-all duration-300"></div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-1">
+
+        <!-- QUIZ ACTIVE VIEW -->
+        <div id="quiz-view" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- LEFT MAIN CONTAINER: Question & Options (8 Cols) -->
+            <div class="lg:col-span-8 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-8 space-y-6">
+                
+                <!-- Question Top Header -->
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div class="flex items-center gap-2">
+                        <span id="q-number-badge" class="px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full uppercase tracking-wider">
+                            Soal 1 dari 15
+                        </span>
+                        <span id="q-category-badge" class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">
+                            Definisi Logaritma
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <div class="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                            <i class="fa-regular fa-clock text-indigo-600"></i>
+                            <span id="timer-display">00:00</span>
+                        </div>
+                        <button id="flag-btn" onclick="toggleFlagCurrentQuestion()" class="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 transition flex items-center gap-1.5 text-slate-600 bg-slate-50 hover:bg-slate-100">
+                            <i class="fa-regular fa-bookmark"></i>
+                            <span id="flag-text">Tandai</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <div class="min-h-[90px]">
+                    <h2 id="q-text" class="text-lg md:text-xl font-bold text-slate-800 leading-relaxed">
+                        Loading soal...
+                    </h2>
+                </div>
+
+                <!-- Answer Options Grid -->
+                <div id="options-container" class="space-y-3">
+                    <!-- Dynamic Options Populated via JS -->
+                </div>
+
+                <!-- Question Navigation Footer -->
+                <div class="flex items-center justify-between pt-4 border-t border-slate-100 gap-2">
+                    <button id="btn-prev" onclick="prevQuestion()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Sebelum
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <button id="btn-next" onclick="nextQuestion()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-md flex items-center gap-2">
+                            Lanjut <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <button id="btn-submit" onclick="confirmSubmitQuiz()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-md flex items-center gap-2 hidden">
+                            <i class="fa-solid fa-paper-plane"></i> Kumpulkan
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT CONTAINER: Navigation Grid Map & Summary (4 Cols) -->
+            <div class="lg:col-span-4 space-y-5">
+                
+                <!-- Question Map Card -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-table-cells text-indigo-600"></i> Peta Navigasi Soal
+                        </h3>
+                        <span id="answered-count-badge" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">
+                            0 / 15 Terjawab
+                        </span>
+                    </div>
+
+                    <!-- Grid Buttons 1-15 -->
+                    <div id="q-grid" class="grid grid-cols-5 gap-2.5 pt-1">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Legend Status -->
+                    <div class="pt-3 border-t border-slate-100 grid grid-cols-3 gap-1 text-[11px] text-slate-500 font-medium">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-md bg-indigo-600"></span> Aktif
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-md bg-emerald-500"></span> Dijawab
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-md bg-amber-400"></span> Ragu
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Action Box -->
+                <div class="bg-indigo-900 text-white rounded-3xl p-6 shadow-md space-y-3">
+                    <h4 class="font-bold text-sm text-indigo-100 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-amber-300"></i> Informasi Kuis
+                    </h4>
+                    <p class="text-xs text-indigo-200 leading-relaxed">
+                        Kamu dapat berpindah nomor soal kapan saja melalui peta navigasi. Pastikan seluruh 15 soal telah dijawab sebelum mengeklik tombol <strong>Kumpulkan</strong>.
+                    </p>
+                    <button onclick="confirmSubmitQuiz()" class="w-full py-2.5 bg-amber-400 hover:bg-amber-300 text-indigo-950 font-bold text-xs rounded-xl transition shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check-double"></i> Selesaikan Kuis Sekarang
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- QUIZ RESULTS VIEW (Hidden by default) -->
+        <div id="results-view" class="hidden space-y-8">
+            
+            <!-- Result Summary Header Card -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-6 md:p-10 text-center space-y-6 max-w-3xl mx-auto">
+                <div id="result-badge-icon" class="w-20 h-20 mx-auto rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl shadow-inner">
+                    🏆
+                </div>
+
+                <div class="space-y-2">
+                    <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-600">Hasil Evaluasi Kuis</span>
+                    <h2 id="result-title" class="text-2xl md:text-3xl font-extrabold text-slate-800">
+                        Luar Biasa!
+                    </h2>
+                    <p id="result-subtext" class="text-xs md:text-sm text-slate-600 max-w-md mx-auto">
+                        Kamu telah menyelesaikan seluruh 15 soal logaritma dengan sangat baik.
+                    </p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto pt-2">
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+                        <span class="text-xs text-slate-500 block font-medium">Skor Akhir</span>
+                        <span id="res-score" class="text-2xl font-black text-indigo-600">0</span>
+                        <span class="text-[10px] text-slate-400 block">/ 100</span>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
+                        <span class="text-xs text-emerald-700 block font-medium">Benar</span>
+                        <span id="res-correct" class="text-2xl font-black text-emerald-600">0</span>
+                        <span class="text-[10px] text-emerald-600/70 block">/ 15 Soal</span>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-100 p-4 rounded-2xl">
+                        <span class="text-xs text-rose-700 block font-medium">Salah</span>
+                        <span id="res-wrong" class="text-2xl font-black text-rose-600">0</span>
+                        <span class="text-[10px] text-rose-600/70 block">/ 15 Soal</span>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 p-4 rounded-2xl">
+                        <span class="text-xs text-amber-700 block font-medium">Waktu</span>
+                        <span id="res-time" class="text-xl font-bold text-amber-600">00:00</span>
+                        <span class="text-[10px] text-amber-600/70 block">Durasi</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons Result -->
+                <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                    <button onclick="restartQuiz()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Coba Kuis Lagi
+                    </button>
+                    <button onclick="scrollToReview()" class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 transition flex items-center gap-2">
+                        <i class="fa-solid fa-list-check"></i> Lihat Pembahasan Detail
+                    </button>
+                </div>
+            </div>
+
+            <!-- Answer Review Section -->
+            <div id="review-section" class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-8 space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">Pembahasan & Kunci Jawaban Lengkap</h3>
+                        <p class="text-xs text-slate-500">Periksa setiap jawabanmu beserta langkah penyelesaiannya.</p>
+                    </div>
+                    <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-xl border border-indigo-100">
+                        15 Soal
+                    </span>
+                </div>
+
+                <!-- Review Items Container -->
+                <div id="review-container" class="space-y-6">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-8">
+        <p>© Modul Interaktif Matematika SMA • Kuis Logaritma 15 Soal (Pilihan Terdistribusi)</p>
+    </footer>
+
+    <!-- HISTORY MODAL -->
+    <div id="history-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-slate-100">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base">Riwayat Pengerjaan Kuis</h3>
+                </div>
+                <button onclick="closeHistoryModal()" class="w-8 h-8 text-slate-400 hover:text-slate-600 text-sm flex items-center justify-center rounded-xl transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- History List -->
+            <div id="history-list-container" class="max-h-72 overflow-y-auto custom-scrollbar space-y-3 pr-1">
+                <!-- Populated dynamically -->
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                <button onclick="clearHistory()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold flex items-center gap-1">
+                    <i class="fa-regular fa-trash-can"></i> Hapus Riwayat
+                </button>
+                <button onclick="closeHistoryModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRMATION MODAL -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-center border border-slate-100">
+            <div id="modal-icon" class="w-14 h-14 mx-auto rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl">
+                ❓
+            </div>
+            <div>
+                <h4 id="modal-title" class="font-bold text-slate-800 text-base">Konfirmasi</h4>
+                <p id="modal-desc" class="text-xs text-slate-500 mt-1 leading-relaxed">Apakah kamu yakin?</p>
+            </div>
+            <div class="flex items-center justify-center gap-3 pt-2">
+                <button id="modal-cancel-btn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition w-1/2">
+                    Batal
+                </button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition w-1/2">
+                    Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 15 LOGARITHM QUESTIONS DATASET - BALANCED OPTION DISTRIBUTION (A, B, C, D)
+        const quizQuestions = [
+            {
+                id: 1,
+                category: "Definisi Logaritma",
+                question: "Berapakah nilai dari $^3\\log 81$ ?",
+                options: ["1", "2", "3", "4"],
+                correct: 3, // Index 3 -> D ("4")
+                explanation: "Karena $3^4 = 81$, maka berdasarkan definisi logaritma $^a\\log b = c \\iff a^c = b$, hasil dari $^3\\log 81 = 4$."
+            },
+            {
+                id: 2,
+                category: "Definisi Logaritma",
+                question: "Jika $5^x = 125$, maka nilai $x$ yang memenuhi $^5\\log 125 = x$ adalah...",
+                options: ["3", "4", "5", "6"],
+                correct: 0, // Index 0 -> A ("3")
+                explanation: "Ubah 125 menjadi bentuk pangkat basis 5: $125 = 5^3$. Oleh karena itu, $^5\\log(5^3) = 3$."
+            },
+            {
+                id: 3,
+                category: "Sifat 1 • Nilai Khusus",
+                question: "Hitunglah nilai dari $^7\\log 7 + ^4\\log 1$ !",
+                options: ["0", "1", "7", "11"],
+                correct: 1, // Index 1 -> B ("1")
+                explanation: "Gunakan Sifat 1: $^a\\log a = 1$ dan $^a\\log 1 = 0$. Maka $^7\\log 7 = 1$ dan $^4\\log 1 = 0$. Hasil $= 1 + 0 = 1$."
+            },
+            {
+                id: 4,
+                category: "Sifat 1 • Nilai Khusus",
+                question: "Hasil dari $^{15}\\log 15 - ^{20}\\log 1$ adalah...",
+                options: ["15", "5", "0", "1"],
+                correct: 3, // Index 3 -> D ("1")
+                explanation: "Ingat $^a\\log a = 1$ ($^{15}\\log 15 = 1$) dan $^a\\log 1 = 0$ ($^{20}\\log 1 = 0$). Maka $1 - 0 = 1$."
+            },
+            {
+                id: 5,
+                category: "Sifat 2 • Penjumlahan",
+                question: "Sederhanakan dan hitung nilai dari $^2\\log 2 + ^2\\log 8$ !",
+                options: ["4", "5", "8", "10"],
+                correct: 0, // Index 0 -> A ("4")
+                explanation: "Menggunakan Sifat 2 Penjumlahan: $^a\\log b + ^a\\log c = ^a\\log(b \\cdot c)$.<br>$^2\\log 2 + ^2\\log 8 = ^2\\log(2 \\times 8) = ^2\\log 16$. Karena $2^4 = 16$, hasilnya adalah <strong>4</strong>."
+            },
+            {
+                id: 6,
+                category: "Sifat 2 • Penjumlahan",
+                question: "Berapakah nilai dari $^2\\log 4 + ^2\\log 16$ ?",
+                options: ["4", "5", "6", "8"],
+                correct: 2, // Index 2 -> C ("6")
+                explanation: "Cara 1: $^2\\log(4 \\times 16) = ^2\\log 64 = 6$.<br>Cara 2: $^2\\log 4 = 2$ dan $^2\\log 16 = 4$. Maka $2 + 4 = 6$."
+            },
+            {
+                id: 7,
+                category: "Sifat 3 • Pengurangan",
+                question: "Hitunglah nilai dari $^3\\log 54 - ^3\\log 2$ !",
+                options: ["1", "2", "3", "9"],
+                correct: 2, // Index 2 -> C ("3")
+                explanation: "Menggunakan Sifat 3 Pengurangan: $^a\\log b - ^a\\log c = ^a\\log\\left(\\frac{b}{c}\\right)$.<br>$^3\\log 54 - ^3\\log 2 = ^3\\log\\left(\\frac{54}{2}\\right) = ^3\\log 27$. Karena $3^3 = 27$, hasilnya adalah <strong>3</strong>."
+            },
+            {
+                id: 8,
+                category: "Sifat 3 • Pengurangan",
+                question: "Hasil dari $^5\\log 250 - ^5\\log 2$ adalah...",
+                options: ["2", "5", "25", "3"],
+                correct: 3, // Index 3 -> D ("3")
+                explanation: "Gabungkan numerus dengan pembagian: $^5\\log\\left(\\frac{250}{2}\\right) = ^5\\log 125$. Karena $5^3 = 125$, hasilnya adalah <strong>3</strong>."
+            },
+            {
+                id: 9,
+                category: "Sifat 4 • Pangkat Numerus",
+                question: "Berapakah nilai dari $^2\\log (16^2)$ ?",
+                options: ["8", "6", "4", "16"],
+                correct: 0, // Index 0 -> A ("8")
+                explanation: "Gunakan Sifat 4 $^a\\log(b^n) = n \\cdot ^a\\log b$.<br>Tarik pangkat 2 ke depan: $2 \\cdot ^2\\log 16 = 2 \\cdot 4 = 8$."
+            },
+            {
+                id: 10,
+                category: "Sifat 4 • Pangkat Numerus",
+                question: "Jika $^2\\log 3 = m$, maka nyatakan $^2\\log 27$ dalam variabel $m$!",
+                options: ["$m+3$", "$2m$", "$3m$", "$m^3$"],
+                correct: 2, // Index 2 -> C ("$3m$")
+                explanation: "Ubah numerus 27 menjadi $3^3$. Tuliskan: $^2\\log 27 = ^2\\log(3^3) = 3 \\cdot ^2\\log 3 = 3m$."
+            },
+            {
+                id: 11,
+                category: "Sifat 5 • Perkalian Berantai",
+                question: "Sederhanakan dan hitung nilai dari $^3\\log 5 \\cdot ^5\\log 81$ !",
+                options: ["2", "3", "4", "5"],
+                correct: 2, // Index 2 -> C ("4")
+                explanation: "Menggunakan Sifat 5 Rantai ($^a\\log b \\cdot ^b\\log c = ^a\\log c$). Angka 5 berantai tercoret, menyisakan $^3\\log 81 = 4$."
+            },
+            {
+                id: 12,
+                category: "Sifat 5 • Perkalian Berantai",
+                question: "Berapakah hasil dari $^2\\log 7 \\cdot ^7\\log 32$ ?",
+                options: ["5", "4", "3", "7"],
+                correct: 0, // Index 0 -> A ("5")
+                explanation: "Coret angka 7 berantai: $^2\\log 7 \\cdot ^7\\log 32 = ^2\\log 32$. Karena $2^5 = 32$, hasilnya adalah <strong>5</strong>."
+            },
+            {
+                id: 13,
+                category: "Kombinasi Sifat",
+                question: "Hitunglah nilai dari $^3\\log 18 + ^3\\log 12 - ^3\\log 8$ !",
+                options: ["2", "3", "4", "6"],
+                correct: 1, // Index 1 -> B ("3")
+                explanation: "Gabungkan sifat penjumlahan (kali) dan pengurangan (bagi):<br>$^3\\log\\left(\\frac{18 \\times 12}{8}\\right) = ^3\\log\\left(\\frac{216}{8}\\right) = ^3\\log 27 = 3$."
+            },
+            {
+                id: 14,
+                category: "Kombinasi Sifat",
+                question: "Nilai dari $^2\\log 5 \\cdot ^5\\log 16 + ^3\\log 3$ adalah...",
+                options: ["3", "5", "4", "6"],
+                correct: 1, // Index 1 -> B ("5")
+                explanation: "Bagian 1 (Sifat Rantai): $^2\\log 5 \\cdot ^5\\log 16 = ^2\\log 16 = 4$.<br>Bagian 2 (Sifat 1): $^3\\log 3 = 1$.<br>Jumlahkan: $4 + 1 = 5$."
+            },
+            {
+                id: 15,
+                category: "Aplikasi Dunia Nyata",
+                question: "Tingkat keasaman pH dirumuskan dengan $\\text{pH} = -\\log [H^+]$. Jika konsentrasi $[H^+] = 10^{-6}$, berapakah nilai pH-nya?",
+                options: ["4", "6", "8", "10"],
+                correct: 1, // Index 1 -> B ("6")
+                explanation: "Substitusi $[H^+] = 10^{-6}$ ke rumus: $\\text{pH} = -\\log(10^{-6})$.<br>Turunkan pangkat $-6$ ke depan: $-(-6) \\cdot \\log 10 = 6 \\cdot 1 = 6$. Jadi pH-nya adalah 6."
+            }
+        ];
+
+        // STATE VARIABLES
+        let currentIndex = 0;
+        let userAnswers = new Array(quizQuestions.length).fill(null);
+        let flaggedStatus = new Array(quizQuestions.length).fill(false);
+        let timerSeconds = 0;
+        let timerInterval = null;
+        let attemptHistory = [];
+
+        // ON LOAD INITIALIZATION
+        window.onload = function() {
+            startTimer();
+            renderQuestionMap();
+            loadQuestion(0);
+            renderMath();
+        };
+
+        function renderMath() {
+            if (window.renderMathInElement) {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: "$$", right: "$$", display: true},
+                        {left: "$", right: "$", display: false}
+                    ]
+                });
+            }
+        }
+
+        // TIMER FUNCTIONS
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerSeconds = 0;
+            updateTimerUI();
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                updateTimerUI();
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const secs = (timerSeconds % 60).toString().padStart(2, '0');
+            const el = document.getElementById('timer-display');
+            if (el) el.innerText = `${mins}:${secs}`;
+        }
+
+        // QUESTION MAP GRID
+        function renderQuestionMap() {
+            const grid = document.getElementById('q-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            let answeredCount = 0;
+
+            quizQuestions.forEach((q, idx) => {
+                const isCurrent = idx === currentIndex;
+                const isAnswered = userAnswers[idx] !== null;
+                const isFlagged = flaggedStatus[idx];
+
+                if (isAnswered) answeredCount++;
+
+                let bgClasses = "bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200";
+                
+                if (isAnswered) {
+                    bgClasses = "bg-emerald-500 text-white font-bold border-emerald-600";
+                }
+                if (isFlagged) {
+                    bgClasses = "bg-amber-400 text-amber-950 font-bold border-amber-500";
+                }
+                if (isCurrent) {
+                    bgClasses += " ring-2 ring-indigo-600 ring-offset-2";
+                }
+
+                const btn = document.createElement('button');
+                btn.className = `h-10 rounded-xl text-xs font-semibold border transition flex items-center justify-center relative ${bgClasses}`;
+                btn.innerText = idx + 1;
+                btn.onclick = () => jumpToQuestion(idx);
+
+                grid.appendChild(btn);
+            });
+
+            const countBadge = document.getElementById('answered-count-badge');
+            if (countBadge) countBadge.innerText = `${answeredCount} / 15 Terjawab`;
+
+            const progressBar = document.getElementById('quiz-progress-bar');
+            if (progressBar) {
+                const pct = Math.round((answeredCount / quizQuestions.length) * 100);
+                progressBar.style.width = `${pct}%`;
+            }
+        }
+
+        // LOAD QUESTION
+        function loadQuestion(index) {
+            currentIndex = index;
+            const q = quizQuestions[index];
+
+            // Header Badges
+            document.getElementById('q-number-badge').innerText = `Soal ${index + 1} dari ${quizQuestions.length}`;
+            document.getElementById('q-category-badge').innerText = q.category;
+
+            // Flag state
+            const flagBtn = document.getElementById('flag-btn');
+            const flagText = document.getElementById('flag-text');
+            if (flaggedStatus[index]) {
+                flagBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-xl border border-amber-300 bg-amber-100 text-amber-800 transition flex items-center gap-1.5";
+                flagText.innerText = "Tandai (Ragu)";
+            } else {
+                flagBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 transition flex items-center gap-1.5 text-slate-600 bg-slate-50 hover:bg-slate-100";
+                flagText.innerText = "Tandai";
+            }
+
+            // Question Text
+            document.getElementById('q-text').innerHTML = q.question;
+
+            // Render Options
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            const optionLabels = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((optText, optIdx) => {
+                const isSelected = userAnswers[index] === optIdx;
+                
+                const optBtn = document.createElement('button');
+                optBtn.className = `w-full p-4 rounded-2xl border text-left text-sm font-medium transition flex items-center justify-between ${
+                    isSelected 
+                        ? 'bg-indigo-50 border-indigo-500 text-indigo-950 font-bold ring-2 ring-indigo-200' 
+                        : 'bg-slate-50/70 border-slate-200 text-slate-700 hover:bg-slate-100'
+                }`;
+                optBtn.onclick = () => selectOption(optIdx);
+
+                optBtn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${
+                            isSelected ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200 text-slate-600'
+                        }">${optionLabels[optIdx]}</span>
+                        <span>${optText}</span>
+                    </div>
+                    ${isSelected ? '<i class="fa-solid fa-circle-check text-indigo-600 text-base"></i>' : ''}
+                `;
+                container.appendChild(optBtn);
+            });
+
+            // Nav Buttons State
+            document.getElementById('btn-prev').disabled = index === 0;
+
+            if (index === quizQuestions.length - 1) {
+                document.getElementById('btn-next').classList.add('hidden');
+                document.getElementById('btn-submit').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-next').classList.remove('hidden');
+                document.getElementById('btn-submit').classList.add('hidden');
+            }
+
+            renderQuestionMap();
+            renderMath();
+        }
+
+        // OPTION SELECTION & NAVIGATION
+        function selectOption(optIdx) {
+            userAnswers[currentIndex] = optIdx;
+            loadQuestion(currentIndex);
+        }
+
+        function toggleFlagCurrentQuestion() {
+            flaggedStatus[currentIndex] = !flaggedStatus[currentIndex];
+            loadQuestion(currentIndex);
+        }
+
+        function jumpToQuestion(idx) {
+            loadQuestion(idx);
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) loadQuestion(currentIndex - 1);
+        }
+
+        function nextQuestion() {
+            if (currentIndex < quizQuestions.length - 1) loadQuestion(currentIndex + 1);
+        }
+
+        // SUBMIT QUIZ
+        function confirmSubmitQuiz() {
+            const unanswered = userAnswers.filter(a => a === null).length;
+            let msg = "Apakah kamu yakin ingin mengumpulkan kuis ini?";
+            if (unanswered > 0) {
+                msg = `Masih ada ${unanswered} soal yang belum dijawab! Yakin ingin mengumpulkan sekarang?`;
+            }
+            showCustomModal("Simpan & Kumpulkan", msg, "🏆", () => {
+                submitQuiz();
+            });
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+
+            // Calculate Score
+            let correctCount = 0;
+            quizQuestions.forEach((q, i) => {
+                if (userAnswers[i] === q.correct) correctCount++;
+            });
+
+            const score = Math.round((correctCount / quizQuestions.length) * 100);
+            const wrongCount = quizQuestions.length - correctCount;
+
+            // Formatted Time
+            const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const secs = (timerSeconds % 60).toString().padStart(2, '0');
+            const timeFormatted = `${mins}:${secs}`;
+
+            // Save to Attempt History
+            const attemptObj = {
+                attemptNumber: attemptHistory.length + 1,
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                score: score,
+                correct: correctCount,
+                time: timeFormatted
+            };
+            attemptHistory.unshift(attemptObj);
+
+            // Populate Results UI
+            document.getElementById('res-score').innerText = score;
+            document.getElementById('res-correct').innerText = correctCount;
+            document.getElementById('res-wrong').innerText = wrongCount;
+            document.getElementById('res-time').innerText = timeFormatted;
+
+            const titleEl = document.getElementById('result-title');
+            const subtextEl = document.getElementById('result-subtext');
+            const iconEl = document.getElementById('result-badge-icon');
+
+            if (score >= 80) {
+                iconEl.innerText = "🥳";
+                titleEl.innerText = "Luar Biasa! Sangat Paham Logaritma";
+                subtextEl.innerText = "Kamu berhasil menguasai 5 Sifat Utama Logaritma dengan sangat tinggi!";
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 70, spread: 80, origin: { y: 0.5 } });
+                }
+            } else if (score >= 60) {
+                iconEl.innerText = "👍";
+                titleEl.innerText = "Bagus! Terus Tingkatkan";
+                subtextEl.innerText = "Pemahaman dasar logaritma kamu sudah cukup baik, pelajari kembali soal yang belum tepat.";
+            } else {
+                iconEl.innerText = "💪";
+                titleEl.innerText = "Jangan Berkecil Hati!";
+                subtextEl.innerText = "Pelajari langkah pembahasan di bawah dan coba kuis sekali lagi ya!";
+            }
+
+            // Render Detailed Review
+            renderReviewSection();
+
+            // Toggle Views
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('results-view').classList.remove('hidden');
+
+            renderMath();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // DETAILED ANSWER REVIEW GENERATOR
+        function renderReviewSection() {
+            const container = document.getElementById('review-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const optionLabels = ['A', 'B', 'C', 'D'];
+
+            quizQuestions.forEach((q, idx) => {
+                const uAns = userAnswers[idx];
+                const isCorrect = uAns === q.correct;
+                const isUnanswered = uAns === null;
+
+                const card = document.createElement('div');
+                card.className = `p-6 rounded-2xl border ${
+                    isCorrect ? 'border-emerald-200 bg-emerald-50/30' : 'border-rose-200 bg-rose-50/20'
+                } space-y-4`;
+
+                let statusBadge = `<span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Benar</span>`;
+                if (!isCorrect) {
+                    statusBadge = `<span class="px-2.5 py-1 bg-rose-100 text-rose-800 text-xs font-bold rounded-lg flex items-center gap-1"><i class="fa-solid fa-circle-xmark"></i> Salah</span>`;
+                }
+                if (isUnanswered) {
+                    statusBadge = `<span class="px-2.5 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-lg flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> Tidak Dijawab</span>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 pb-3">
+                        <span class="text-xs font-bold text-indigo-700">Soal ${idx + 1} • ${q.category}</span>
+                        ${statusBadge}
+                    </div>
+                    <p class="font-bold text-slate-800 text-sm md:text-base">${q.question}</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div class="p-3 rounded-xl ${isCorrect ? 'bg-emerald-100/60 font-bold text-emerald-900 border border-emerald-200' : 'bg-white border border-slate-200 text-slate-600'}">
+                            <strong>Jawaban Kamu:</strong> ${uAns !== null ? optionLabels[uAns] + '. ' + q.options[uAns] : '<i>Belum dijawab</i>'}
+                        </div>
+                        <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-200 font-bold text-indigo-950">
+                            <strong>Kunci Jawaban:</strong> ${optionLabels[q.correct]}. ${q.options[q.correct]}
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 space-y-1">
+                        <p class="font-bold text-indigo-900 flex items-center gap-1 mb-1">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i> Pembahasan:
+                        </p>
+                        <p class="leading-relaxed">${q.explanation}</p>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function scrollToReview() {
+            const el = document.getElementById('review-section');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // RESTART & RESET LOGIC
+        function restartQuiz() {
+            userAnswers.fill(null);
+            flaggedStatus.fill(false);
+            currentIndex = 0;
+
+            document.getElementById('results-view').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+
+            startTimer();
+            loadQuestion(0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function confirmReset() {
+            showCustomModal(
+                "Mulai Dari Awal?",
+                "Progres kuis saat ini akan direset dari Soal Nomor 1.",
+                "🔄",
+                () => {
+                    restartQuiz();
+                }
+            );
+        }
+
+        // HISTORY MODAL FUNCTIONS
+        function openHistoryModal() {
+            renderHistoryList();
+            document.getElementById('history-modal').classList.remove('hidden');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('history-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (attemptHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-slate-400 text-xs">
+                        <i class="fa-solid fa-inbox text-2xl mb-2 block"></i>
+                        Belum ada riwayat pengerjaan kuis.
+                    </div>
+                `;
+                return;
+            }
+
+            attemptHistory.forEach(att => {
+                const item = document.createElement('div');
+                item.className = "p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs";
+                item.innerHTML = `
+                    <div class="space-y-0.5">
+                        <span class="font-bold text-slate-800 block">Percobaan #${att.attemptNumber}</span>
+                        <span class="text-[11px] text-slate-400">${att.date} • Durasi ${att.time}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-base font-black text-indigo-600 block">${att.score} Poin</span>
+                        <span class="text-[10px] text-emerald-600 font-semibold">${att.correct} / 15 Benar</span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function clearHistory() {
+            attemptHistory = [];
+            renderHistoryList();
+        }
+
+        // CUSTOM MODAL DIALOG CONTROLLER (No alert/confirm)
+        function showCustomModal(title, desc, icon, onConfirm) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('modal-icon').innerText = icon;
+
+            const modal = document.getElementById('confirm-modal');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+
+            modal.classList.remove('hidden');
+
+            cancelBtn.onclick = () => {
+                modal.classList.add('hidden');
+            };
+
+            confirmBtn.onclick = () => {
+                modal.classList.add('hidden');
+                if (typeof onConfirm === 'function') onConfirm();
+            };
+        }
+    </script>
+</body>
+</html>
